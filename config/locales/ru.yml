@@ -1,0 +1,9 @@
+ru:
+  categories:
+    daily: "Ежедневные"
+    weekly: "На этой неделе"
+    monthly: "В этом месяце"
+  helpers:
+    submit:
+      create: "Создать"
+      update: "Сохранить"

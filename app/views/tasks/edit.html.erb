@@ -1,0 +1,39 @@
+<h1>✏️ Редактировать задачу</h1>
+
+<%= form_with model: @task, local: true do |f| %>
+  <% if @task.errors.any? %>
+    <div class="errors">
+      <h3><%= pluralize(@task.errors.count, "ошибка") %>:</h3>
+      <ul>
+        <% @task.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :title, "Название" %>
+    <%= f.text_field :title, autofocus: true %>
+  </div>
+
+  <div>
+    <%= f.label :category, "Категория" %>
+    <%= f.select :category, Task.categories.keys.map { |c| [t("categories.#{c}"), c] }, {}, class: "form-select" %>
+  </div>
+
+  <div>
+    <%= f.label :due_date, "Дата выполнения" %>
+    <%= f.date_field :due_date, class: "form-input" %>
+  </div>
+
+  <div class="checkbox-row">
+    <%= f.check_box :completed %>
+    <%= f.label :completed, "Завершено" %>
+  </div>
+
+  <div class="form-actions">
+    <%= f.submit "Сохранить", class: "btn btn-primary" %>
+    <%= link_to "← Назад", tasks_path, class: "btn btn-ghost" %>
+  </div>
+<% end %>

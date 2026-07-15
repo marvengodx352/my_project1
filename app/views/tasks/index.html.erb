@@ -1,0 +1,97 @@
+<!-- Логотип -->
+<header class="app-header">
+  <div class="logo">
+    <span class="logo-icon">✅</span>
+    <h1>Мои задачи</h1>
+  </div>
+  <p class="logo-subtitle">Организуй свой день эффективно</p>
+</header>
+
+<!-- Погода (компактная полоса) -->
+<div class="weather-bar" id="weather-widget" data-controller="weather">
+  <div class="weather-loading">🌤️ Загружаем погоду...</div>
+</div>
+
+<% if notice %>
+  <div class="flash flash-notice"><%= notice %></div>
+<% end %>
+
+<!-- Основная сетка: задачи слева, сайдбар справа -->
+<div class="main-grid">
+  <!-- Левая колонка: список задач -->
+  <div class="tasks-column">
+    <div class="add-task-link">
+      <%= link_to "+ Новая задача", new_task_path, class: "btn btn-primary" %>
+    </div>
+
+    <div class="tasks">
+      <% if @tasks.any? %>
+        <% @tasks.each do |task| %>
+          <div class="task <%= 'done' if task.completed? %>" data-controller="task" data-task-id="<%= task.id %>">
+            <span class="task-title">
+              <%= task.title %>
+              <% if task.due_date.present? %>
+                <small class="task-due">📅 <%= task.due_date.strftime("%d.%m.%Y") %></small>
+              <% end %>
+            </span>
+            <span class="task-category-badge"><%= t("categories.#{task.category}") %></span>
+            <span class="task-actions">
+              <%= link_to "👁️", task, class: "btn-icon", title: "Просмотр" %>
+              <%= link_to "✏️", edit_task_path(task), class: "btn-icon", title: "Редактировать" %>
+              <form style="display:inline">
+                <button class="btn-icon" data-action="click->task#toggle" title="<%= task.completed? ? 'Отменить' : 'Завершить' %>">
+                  <%= task.completed? ? "↩️" : "✅" %>
+                </button>
+              </form>
+              <form style="display:inline">
+                <button class="btn-icon" data-action="click->task#destroy" title="Удалить">🗑️</button>
+              </form>
+            </span>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="empty-state">
+          <span class="icon">📝</span>
+          <p><%= @search_query.present? || @active_category.present? ? "Ничего не найдено." : "Пока нет задач." %></p>
+          <%= link_to "Создать первую!", new_task_path, class: "btn btn-primary" unless @search_query.present? || @active_category.present? %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Правая колонка: поиск + категории -->
+  <aside class="sidebar">
+    <!-- Поиск -->
+    <div class="sidebar-card">
+      <h3 class="sidebar-title">🔍 Поиск</h3>
+      <%= form_tag tasks_path, method: :get, class: "sidebar-search-form" do %>
+        <%= text_field_tag :search, @search_query, placeholder: "Введите название...", class: "search-input" %>
+        <%= hidden_field_tag :category, @active_category if @active_category.present? %>
+        <%= submit_tag "Найти", class: "btn btn-primary btn-sm" %>
+        <% if @search_query.present? %>
+          <%= link_to "✖ Сбросить", tasks_path(category: @active_category), class: "btn btn-ghost btn-sm" %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <!-- Категории -->
+    <div class="sidebar-card">
+      <h3 class="sidebar-title">📂 Категории</h3>
+      <div class="category-list">
+        <%= link_to tasks_path(search: @search_query), class: "category-item #{'active' if @active_category.blank?}" do %>
+          <span class="category-dot"></span>
+          <span>Все задачи</span>
+          <span class="category-count"><%= Task.count %></span>
+        <% end %>
+        <% Task.categories.each do |key, val| %>
+          <% count = Task.where(category: val).count %>
+          <%= link_to tasks_path(category: key, search: @search_query), class: "category-item #{'active' if @active_category == key.to_s}" do %>
+            <span class="category-dot cat-<%= key %>"></span>
+            <span><%= t("categories.#{key}") %></span>
+            <span class="category-count"><%= count %></span>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </aside>
+</div>
